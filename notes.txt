@@ -1,0 +1,4 @@
+dbpasswd : AwLxZJTH0EvpZWTq
+
+proj url: https://hyiwpncsindrucyexzit.supabase.co
+api key : eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5aXdwbmNzaW5kcnVjeWV4eml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjYwODcsImV4cCI6MjA2NzMwMjA4N30.oajL3I23UU486koe3Zz4pmNLk33mOKQ0xaKY8qC2P7I

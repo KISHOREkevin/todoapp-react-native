@@ -1,75 +1,171 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { supabase } from "@/services/supabase";
+import { Link } from "expo-router";
+import { useEffect, useState } from "react";
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 
-export default function HomeScreen() {
+export default function Index() {
+
+  const [tasks, setTasks] = useState<any>([]);
+  const [load, setLoad] = useState<boolean>(false);
+  const [taskInput, setTaskInput] = useState<string>("");
+  const [error,setError] = useState<any>();
+  useEffect(() => {
+
+    setLoad(true);
+    const fetchdata = async () => {
+      try {
+
+        let { data: todolist, error: supabaseerror } = (await supabase.from('todolist').select('*').order("id",{ascending:false}));
+        if (todolist && todolist.length > 0) {
+          setTasks(todolist);
+
+        }
+        if (supabaseerror) {
+          throw supabaseerror
+
+        }
+      } catch (error) {
+        setError(error);
+
+      }
+    }
+    setLoad(false);
+    fetchdata()
+  }, [])
+
+  const addItem = async (task: string) => {
+    try {
+      if (taskInput.length > 0 && taskInput !== " ") {
+        const { data, error: additemerror } = await supabase.from('todolist').insert([{ task }]).select();
+        if(data){
+          setError("");
+        }
+        if (additemerror) {
+          throw additemerror
+        }
+      }else{
+        throw "Enter Item ...."
+      } 
+      let { data: todolist, error: supabaseerror } = await supabase.from('todolist').select('*');
+      if (todolist && todolist.length > 0) {
+        setTasks(todolist);
+        setTaskInput("");
+      }
+      if (supabaseerror) {
+        throw supabaseerror
+
+      }
+
+
+    } catch (error) {
+      setError(error);
+
+    }
+  }
+
+  const deleteItem = async (taskid: number) => {
+    try {
+      const { error: deleteItemError } = await supabase.from('todolist').delete().eq('id', taskid);
+      if (deleteItemError) {
+        throw deleteItemError
+      }
+      let { data: todolist, error: supabaseerror } = await supabase.from('todolist').select('*');
+      if (todolist && todolist.length > 0) {
+        setTasks(todolist);
+        setTaskInput("");
+      } else {
+        setTasks([]);
+      }
+      setError("");
+      if (supabaseerror) {
+        throw supabaseerror
+
+      }
+
+
+
+    } catch (error) {
+      setError(error);
+
+    }
+  }
+
+  if (load) {
+    return <Text>Loading</Text>
+
+  }
+
+  type ItemProp = { itemname: string, itemid: number };
+  const Item = ({ itemname, itemid }: ItemProp) => {
+
+
+    return (
+      <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-around", margin: 6 }}>
+        <Text>{itemname}</Text>
+        <Link href={`/updateitem/${itemid}`} asChild>
+          <TouchableOpacity style={{ backgroundColor: "blue", padding: 10, borderRadius: 5 }}>
+            <Text style={{ color: "white", textAlign: "center", }}>Update</Text>
+          </TouchableOpacity>
+
+        </Link>
+
+        <TouchableOpacity onPress={() => deleteItem(itemid)} style={{ backgroundColor: "red", padding: 10, borderRadius: 5 }}>
+          <Text style={{ color: "white", textAlign: "center", }}>Done</Text>
+        </TouchableOpacity>
+
+
+      </View>
+    )
+  }
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View>
+      <Text style={styles.heading} >Todo App</Text>
+      <TextInput style={styles.input} placeholder="task here..." value={taskInput} onChangeText={(value) => setTaskInput(value)} />
+      <TouchableOpacity style={styles.button} onPress={() => addItem(taskInput)}  >
+        <Text style={{ color: "white", textAlign: "center", }}>Add Item</Text>
+      </TouchableOpacity>
+      {error && <Text style={styles.errorText}>{error}</Text>}
+      {tasks.length > 0 &&
+        <FlatList style={styles.listStyle} data={tasks} keyExtractor={item => item.id} renderItem={({ item }) => <Item itemname={item.task} itemid={item.id} />} />}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center"
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  heading: {
+    fontWeight: "bold",
+    fontSize: 30,
+    textAlign: "center",
+    marginTop: 20
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  input: {
+    borderWidth: 1,
+    padding: 10,
+    width: "auto",
+    margin: 5,
+    borderRadius: 5,
+    borderColor: "blue"
   },
-});
+  listStyle: {
+    flex: 0,
+    margin: 5
+  },
+  button: {
+    width: "auto",
+    padding: 20,
+    backgroundColor: "blue",
+    borderRadius: 5,
+    margin: 5,
+  },
+  errorText:{
+    textAlign:"center",
+    fontSize:32,
+    fontWeight:"bold"
+  }
+})
