@@ -1,4 +1,5 @@
 import { supabase } from "@/services/supabase";
+import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -105,13 +106,13 @@ export default function Index() {
         <Text>{itemname}</Text>
         <Link href={`/updateitem/${itemid}`} asChild>
           <TouchableOpacity style={{ backgroundColor: "blue", padding: 10, borderRadius: 5 }}>
-            <Text style={{ color: "white", textAlign: "center", }}>Update</Text>
+            <Text style={{ color: "white", textAlign: "center", }}> <Ionicons name="pencil-sharp" /> </Text>
           </TouchableOpacity>
 
         </Link>
 
         <TouchableOpacity onPress={() => deleteItem(itemid)} style={{ backgroundColor: "red", padding: 10, borderRadius: 5 }}>
-          <Text style={{ color: "white", textAlign: "center", }}>Done</Text>
+          <Text style={{ color: "white", textAlign: "center", }}> <Ionicons name="trash-bin-sharp" /> </Text>
         </TouchableOpacity>
 
 
@@ -123,7 +124,7 @@ export default function Index() {
       <Text style={styles.heading} >Todo App</Text>
       <TextInput style={styles.input} placeholder="task here..." value={taskInput} onChangeText={(value) => setTaskInput(value)} />
       <TouchableOpacity style={styles.button} onPress={() => addItem(taskInput)}  >
-        <Text style={{ color: "white", textAlign: "center", }}>Add Item</Text>
+        <Text style={{ color: "white", textAlign: "center", }}> <Ionicons name="add-sharp" /> Add Item</Text>
       </TouchableOpacity>
       {error && <Text style={styles.errorText}>{error}</Text>}
       {tasks.length > 0 &&
