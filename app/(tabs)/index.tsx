@@ -2,7 +2,8 @@ import { supabase } from "@/services/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
-import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import Animated, { LinearTransition } from "react-native-reanimated";
+import { FlatList, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 
 export default function Index() {
@@ -10,14 +11,14 @@ export default function Index() {
   const [tasks, setTasks] = useState<any>([]);
   const [load, setLoad] = useState<boolean>(false);
   const [taskInput, setTaskInput] = useState<string>("");
-  const [error,setError] = useState<any>();
+  const [error, setError] = useState<any>();
   useEffect(() => {
 
     setLoad(true);
     const fetchdata = async () => {
       try {
 
-        let { data: todolist, error: supabaseerror } = (await supabase.from('todolist').select('*').order("id",{ascending:false}));
+        let { data: todolist, error: supabaseerror } = (await supabase.from('todolist').select('*').order("id", { ascending: false }));
         if (todolist && todolist.length > 0) {
           setTasks(todolist);
 
@@ -35,20 +36,40 @@ export default function Index() {
     fetchdata()
   }, [])
 
+
+  const reloadData = async () => {
+    try {
+
+      let { data: todolist, error: supabaseerror } = (await supabase.from('todolist').select('*').order("id", { ascending: false }));
+      if (todolist && todolist.length > 0) {
+        setTasks(todolist);
+
+      }
+      if (supabaseerror) {
+        throw supabaseerror
+
+      }
+    } catch (error) {
+      setError(error);
+
+    }
+
+  }
+
   const addItem = async (task: string) => {
     try {
       if (taskInput.length > 0 && taskInput !== " ") {
         const { data, error: additemerror } = await supabase.from('todolist').insert([{ task }]).select();
-        if(data){
+        if (data) {
           setError("");
         }
         if (additemerror) {
           throw additemerror
         }
-      }else{
+      } else {
         throw "Enter Item ...."
-      } 
-      let { data: todolist, error: supabaseerror } = await supabase.from('todolist').select('*');
+      }
+      let { data: todolist, error: supabaseerror } = await supabase.from('todolist').select('*').order("id", { ascending: false });
       if (todolist && todolist.length > 0) {
         setTasks(todolist);
         setTaskInput("");
@@ -71,7 +92,7 @@ export default function Index() {
       if (deleteItemError) {
         throw deleteItemError
       }
-      let { data: todolist, error: supabaseerror } = await supabase.from('todolist').select('*');
+      let { data: todolist, error: supabaseerror } = await supabase.from('todolist').select('*').order("id", { ascending: false });
       if (todolist && todolist.length > 0) {
         setTasks(todolist);
         setTaskInput("");
@@ -102,16 +123,16 @@ export default function Index() {
 
 
     return (
-      <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-around", margin: 6 }}>
-        <Text>{itemname}</Text>
+      <View style={{ padding: 5, display: "flex", width: "auto", flexDirection: "row", justifyContent: "space-around", margin: 6, backgroundColor: "lightblue",borderRadius:5 }}>
+        <Text style={{ fontSize: 24, flex: 1, flexGrow: 5, overflowX: "scroll" }}> <Ionicons name="arrow-forward-circle" /> {itemname}</Text>
         <Link href={`/updateitem/${itemid}`} asChild>
-          <TouchableOpacity style={{ backgroundColor: "blue", padding: 10, borderRadius: 5 }}>
+          <TouchableOpacity style={{ flex: 1, backgroundColor: "blue", padding: 10, borderRadius: 5 }}>
             <Text style={{ color: "white", textAlign: "center", }}> <Ionicons name="pencil-sharp" /> </Text>
           </TouchableOpacity>
 
         </Link>
 
-        <TouchableOpacity onPress={() => deleteItem(itemid)} style={{ backgroundColor: "red", padding: 10, borderRadius: 5 }}>
+        <TouchableOpacity onPress={() => deleteItem(itemid)} style={{ backgroundColor: "red", padding: 10, borderRadius: 5, flex: 1 }}>
           <Text style={{ color: "white", textAlign: "center", }}> <Ionicons name="trash-bin-sharp" /> </Text>
         </TouchableOpacity>
 
@@ -128,7 +149,7 @@ export default function Index() {
       </TouchableOpacity>
       {error && <Text style={styles.errorText}>{error}</Text>}
       {tasks.length > 0 &&
-        <FlatList style={styles.listStyle} data={tasks} keyExtractor={item => item.id} renderItem={({ item }) => <Item itemname={item.task} itemid={item.id} />} />}
+        < Animated.FlatList refreshControl={ <RefreshControl refreshing={load} onRefresh={reloadData} />} scrollEnabled={true} keyboardDismissMode={"on-drag"} itemLayoutAnimation={LinearTransition} style={styles.listStyle} data={tasks} keyExtractor={item => item.id} renderItem={({ item }) => <Item itemname={item.task} itemid={item.id} />} />}
     </View>
   );
 }
@@ -154,8 +175,8 @@ const styles = StyleSheet.create({
     borderColor: "blue"
   },
   listStyle: {
-    flex: 0,
-    margin: 5
+    marginBottom: 190
+
   },
   button: {
     width: "auto",
@@ -164,9 +185,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     margin: 5,
   },
-  errorText:{
-    textAlign:"center",
-    fontSize:32,
-    fontWeight:"bold"
+  errorText: {
+    textAlign: "center",
+    fontSize: 32,
+    fontWeight: "bold"
   }
 })

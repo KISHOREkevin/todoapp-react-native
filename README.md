@@ -31,20 +31,24 @@ A simple and efficient ToDo application built with **React Native** and powered 
     - Create a project on Supabase
     - create .env 
     - paste this 
-        ```
-            EXPO_PUBLIC_SUPABASE_URL=<your-supabase-url>
-            EXPO_PUBLIC_SUPABASE_KEY=<your-supabase-key>
-        ```
+      ```
+      EXPO_PUBLIC_SUPABASE_URL=<your-supabase-url>
+      EXPO_PUBLIC_SUPABASE_KEY=<your-supabase-key>
+      ```
 4. Run the App
     ```sh
     npx expo start
     ```
+
+## ScreenShot
+![Todo-list](./screenshots/screenshot.jpg) 
+
 ## Contributions
 
 This project was made possible thanks to:
-    * The React Native community
-    * Supabase for the backend
-    * Open-source libraries & tools
+- The React Native community
+- Supabase for the backend
+- Open-source libraries & tools
 
 Feel free to contribute by opening issues or pull requests!
 
