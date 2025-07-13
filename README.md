@@ -53,4 +53,4 @@ This project was made possible thanks to:
 Feel free to contribute by opening issues or pull requests!
 
 ## License
-MIT © Kishore Kevin
+MIT © Kishore Kevin [License](https://github.com/KISHOREkevin/todoapp-react-native/blob/main/LICENSE)  
