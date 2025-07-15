@@ -1,19 +1,17 @@
 # ToDo App with Supabase  
 
-A simple and efficient ToDo application built with **React Native** and powered by **Supabase** as the backend.  
+A simple and efficient ToDo application built with **React Native** and powered by **SQLite** as the backend.  
 
 ## Features  
 
 - [x] Add, edit, and delete tasks  
-- [x] Organize tasks with categories (optional, if applicable)  
-- [x] Secure authentication (if implemented)  
-- [x] Real-time sync with Supabase  
+- [x] Real-time sync with SQLite 
 - [x] Cross-platform (iOS & Android)  
 
 ## Technologies Used  
 
 - **Frontend:** React Native (Expo)  
-- **Backend:** Supabase (PostgreSQL + Realtime API)  
+- **Backend:** SQLite 
 - **Navigation:** React Navigation  
 - **Styling:** StyleSheet 
 ## Setup & Installation  
@@ -27,15 +25,7 @@ A simple and efficient ToDo application built with **React Native** and powered 
     ```sh
     npm install
     ```
-3. **Set up Supabase**
-    - Create a project on Supabase
-    - create .env 
-    - paste this 
-      ```
-      EXPO_PUBLIC_SUPABASE_URL=<your-supabase-url>
-      EXPO_PUBLIC_SUPABASE_KEY=<your-supabase-key>
-      ```
-4. Run the App
+3. Run the App
     ```sh
     npx expo start
     ```
@@ -47,7 +37,7 @@ A simple and efficient ToDo application built with **React Native** and powered 
 
 This project was made possible thanks to:
 - The React Native community
-- Supabase for the backend
+- SQLite for the backend
 - Open-source libraries & tools
 
 Feel free to contribute by opening issues or pull requests!

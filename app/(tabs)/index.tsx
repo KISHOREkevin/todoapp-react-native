@@ -4,10 +4,11 @@ import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import Animated, { LinearTransition } from "react-native-reanimated";
 import { FlatList, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-
+import db from "@/services/todostore";
 
 export default function Index() {
 
+  const TABLE = "main";
   const [tasks, setTasks] = useState<any>([]);
   const [load, setLoad] = useState<boolean>(false);
   const [taskInput, setTaskInput] = useState<string>("");
@@ -17,16 +18,13 @@ export default function Index() {
     setLoad(true);
     const fetchdata = async () => {
       try {
+        await db.execAsync(
+          `CREATE TABLE IF NOT EXISTS ${TABLE} (id INTEGER PRIMARY KEY NOT NULL, task TEXT NOT NULL)`
+        );
 
-        let { data: todolist, error: supabaseerror } = (await supabase.from('todolist').select('*').order("id", { ascending: false }));
-        if (todolist && todolist.length > 0) {
-          setTasks(todolist);
+        const data = await db.getAllAsync(`SELECT * FROM ${TABLE}`);
+        setTasks(data);
 
-        }
-        if (supabaseerror) {
-          throw supabaseerror
-
-        }
       } catch (error) {
         setError(error);
 
@@ -40,15 +38,8 @@ export default function Index() {
   const reloadData = async () => {
     try {
 
-      let { data: todolist, error: supabaseerror } = (await supabase.from('todolist').select('*').order("id", { ascending: false }));
-      if (todolist && todolist.length > 0) {
-        setTasks(todolist);
-
-      }
-      if (supabaseerror) {
-        throw supabaseerror
-
-      }
+      const data = await db.getAllAsync(`SELECT * FROM ${TABLE}`);
+      setTasks(data);
     } catch (error) {
       setError(error);
 
@@ -59,26 +50,23 @@ export default function Index() {
   const addItem = async (task: string) => {
     try {
       if (taskInput.length > 0 && taskInput !== " ") {
-        const { data, error: additemerror } = await supabase.from('todolist').insert([{ task }]).select();
-        if (data) {
-          setError("");
-        }
-        if (additemerror) {
-          throw additemerror
+        const insertStmt = await db.prepareAsync(`INSERT INTO ${TABLE} VALUES ($id,$task)`);
+        try {
+          await insertStmt.executeAsync({ $task: task });
+
+        } catch (error) {
+          setError(error);
+
+        } finally {
+          await insertStmt.finalizeAsync();
         }
       } else {
         throw "Enter Item ...."
       }
-      let { data: todolist, error: supabaseerror } = await supabase.from('todolist').select('*').order("id", { ascending: false });
-      if (todolist && todolist.length > 0) {
-        setTasks(todolist);
-        setTaskInput("");
-      }
-      if (supabaseerror) {
-        throw supabaseerror
 
-      }
-
+      const data = await db.getAllAsync(`SELECT * FROM ${TABLE}`);
+      setTasks(data);
+      setTaskInput("");
 
     } catch (error) {
       setError(error);
@@ -88,24 +76,12 @@ export default function Index() {
 
   const deleteItem = async (taskid: number) => {
     try {
-      const { error: deleteItemError } = await supabase.from('todolist').delete().eq('id', taskid);
-      if (deleteItemError) {
-        throw deleteItemError
-      }
-      let { data: todolist, error: supabaseerror } = await supabase.from('todolist').select('*').order("id", { ascending: false });
-      if (todolist && todolist.length > 0) {
-        setTasks(todolist);
-        setTaskInput("");
-      } else {
-        setTasks([]);
-      }
-      setError("");
-      if (supabaseerror) {
-        throw supabaseerror
-
-      }
-
-
+      const deleteStmt = await db.prepareAsync(`DELETE FROM ${TABLE} WHERE id=$taskid`);
+      
+      await deleteStmt.executeAsync({$taskid:taskid}); 
+      
+      const data = await db.getAllAsync(`SELECT * FROM ${TABLE}`);
+      setTasks(data);
 
     } catch (error) {
       setError(error);
@@ -123,7 +99,7 @@ export default function Index() {
 
 
     return (
-      <View style={{ padding: 5, display: "flex", width: "auto", flexDirection: "row", justifyContent: "space-around", margin: 6, backgroundColor: "lightblue",borderRadius:5 }}>
+      <View style={{ padding: 5, display: "flex", width: "auto", flexDirection: "row", justifyContent: "space-around", margin: 6, backgroundColor: "lightblue", borderRadius: 5 }}>
         <Text style={{ fontSize: 24, flex: 1, flexGrow: 5, overflowX: "scroll" }}> <Ionicons name="arrow-forward-circle" /> {itemname}</Text>
         <Link href={`/updateitem/${itemid}`} asChild>
           <TouchableOpacity style={{ flex: 1, backgroundColor: "blue", padding: 10, borderRadius: 5 }}>
@@ -149,7 +125,7 @@ export default function Index() {
       </TouchableOpacity>
       {error && <Text style={styles.errorText}>{error}</Text>}
       {tasks.length > 0 &&
-        < Animated.FlatList refreshControl={ <RefreshControl refreshing={load} onRefresh={reloadData} />} scrollEnabled={true} keyboardDismissMode={"on-drag"} itemLayoutAnimation={LinearTransition} style={styles.listStyle} data={tasks} keyExtractor={item => item.id} renderItem={({ item }) => <Item itemname={item.task} itemid={item.id} />} />}
+        < Animated.FlatList refreshControl={<RefreshControl refreshing={load} onRefresh={reloadData} />} scrollEnabled={true} keyboardDismissMode={"on-drag"} itemLayoutAnimation={LinearTransition} style={styles.listStyle} data={tasks} keyExtractor={item => item.id} renderItem={({ item }) => <Item itemname={item.task} itemid={item.id} />} />}
     </View>
   );
 }

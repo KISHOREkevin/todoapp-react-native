@@ -13,7 +13,7 @@ export default function AboutScreen() {
     >
     
       <Text style={{textAlign:"center",fontSize:20}}>This app was developed with contributions from open source communities, 
-  including React Native, Supabase, and other supporting libraries.
+  including React Native, SQLite, and other supporting libraries.
   Special thanks to all contributors who helped make these technologies available.</Text>
     <Text>Copyright (c) 2025 Kishore Kevin. All Rights Reserved.</Text>
       </View>

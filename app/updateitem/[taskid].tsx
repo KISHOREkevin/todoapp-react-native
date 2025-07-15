@@ -2,24 +2,22 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { View, Text,TouchableOpacity,TextInput,StyleSheet } from 'react-native'
 import { supabase } from '@/services/supabase';
 import { useEffect, useState } from 'react';
+import db from '@/services/todostore';
 export default function UpdateItem() {
   const [taskInput,setTaskInput] = useState<any>("");
   const [load,setLoad] = useState<boolean>(false);
   const [error,setError] = useState<any>();
   const {taskid} = useLocalSearchParams();
   
+  const TABLE = "main";
   useEffect(()=>{
     
     const fetchdata = async ()=>{
       try {
         setLoad(true);
-        let { data: todolist, error:supabaseerror } = await supabase.from('todolist').select('*').eq('id',taskid)
-        if(supabaseerror){
-          throw supabaseerror
-        }
-        if(todolist && todolist.length > 0){
-          setTaskInput(todolist[0].task) 
-        }
+        let data = await db.getFirstAsync(`SELECT * FROM ${TABLE} WHERE id=${taskid}`);
+        setTaskInput(data.task);
+        
         setLoad(false);
       } catch (error) {
           setError(error);
@@ -31,18 +29,22 @@ export default function UpdateItem() {
 
   const updateTask = async (taskid:any)=>{
     try {
-      const { data, error } = await supabase.from('todolist').update({ task: taskInput }).eq('id', taskid).select();
-      if(data){
-        router.navigate("/");
+      const updateStmt = await db.prepareAsync(`UPDATE ${TABLE} SET task = "${taskInput}" WHERE id = $taskid`);
+
+      try {
+                await updateStmt.executeAsync({$taskid:taskid}); 
+      
+
+      } catch (error) {
+          setError(error);
+                          
+      }finally{
+        await updateStmt.finalizeAsync();
       }
-      if(error){
-        throw error
-      }
-           
-    } catch (error) {
+      router.navigate("/");
+  } catch (error) {
       setError(error);
-    }
-  }
+    }  }
   
   if(load){
     return <Text>Loading ...</Text>
