@@ -53,13 +53,14 @@ export default function Index() {
         const insertStmt = await db.prepareAsync(`INSERT INTO ${TABLE} VALUES ($id,$task)`);
         try {
           await insertStmt.executeAsync({ $task: task });
-
+    
         } catch (error) {
           setError(error);
 
         } finally {
           await insertStmt.finalizeAsync();
         }
+        setError("");
       } else {
         throw "Enter Item ...."
       }
