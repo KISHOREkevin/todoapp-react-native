@@ -1,4 +1,4 @@
-# ToDo App with Supabase  
+# ToDo App with SQLite  
 
 A simple and efficient ToDo application built with **React Native** and powered by **SQLite** as the backend.  
 
