@@ -14,7 +14,11 @@ A simple and efficient ToDo application built with **React Native** and powered 
 - **Backend:** SQLite 
 - **Navigation:** React Navigation  
 - **Styling:** StyleSheet 
-## Setup & Installation  
+
+## Installation
+Go to release page https://github.com/KISHOREkevin/todoapp-react-native/releases and download the `todoapp.apk`.
+
+## Contribution (Setup) 
 
 1. **Clone the repository**  
    ```sh
